@@ -132,6 +132,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @SuppressWarnings("WeakerAccess")
 public class FtcRobotControllerActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2
   {
+
   public static final String TAG = "RCActivity";
   public String getTag() { return TAG; }
 
@@ -176,33 +177,21 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 
   private CameraBridgeViewBase mOpenCvCameraView;
 
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
-      @Override
-      public void onManagerConnected(int status) {
-        switch (status) {
-          case LoaderCallbackInterface.SUCCESS:
-          {
-            Log.i(TAG, "OpenCV loaded successfully");
-            mOpenCvCameraView.enableView();
-          } break;
-          default:
-          {
-              Log.d(TAG, "BAD BDA BAD BAD BDA BDA BDA");
-            super.onManagerConnected(status);
-          } break;
-        }
-      }
-    };
 
     public void myOnCreate() {
         Log.i(TAG, "called onCreate");
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.HelloOpenCvView);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+        mOpenCvCameraView.enableView();
     }
 
     public void myOnResume() {
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_4_0, this, mLoaderCallback);
+        if (!OpenCVLoader.initDebug()) {
+            Log.e(TAG, "  OpenCVLoader.initDebug(), not working.");
+        } else {
+            Log.i(TAG, "  OpenCVLoader.initDebug(), working.");
+        }
     }
 
     public void myOnPause() {
@@ -219,16 +208,17 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-
+        Log.i(TAG, "Started camera view");
     }
 
     @Override
     public void onCameraViewStopped() {
-
+        Log.i(TAG, "Stopped Camera View");
     }
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        Log.i(TAG, "Received camera frame");
       return inputFrame.rgba();
     }
 
