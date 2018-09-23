@@ -175,33 +175,56 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
   protected WifiMuteStateMachine wifiMuteStateMachine;
   protected MotionDetection motionDetection;
 
-  private CameraBridgeViewBase mOpenCvCameraView;
+  private static CameraBridgeViewBase mOpenCvCameraView;
+
+  private boolean enableOpenCV = false;
+
+  public static void setOpenCvListener (CameraBridgeViewBase.CvCameraViewListener2 listener) {
+    mOpenCvCameraView.setCvCameraViewListener(listener);
+  }
+
+  public static void enableCvCameraView() {
+    mOpenCvCameraView.enableView();
+  }
+
+    public static void disableCvCameraView() {
+      mOpenCvCameraView.disableView();
+    }
+
+    public static void setCvVisibility(int status) {
+    mOpenCvCameraView.setVisibility(status);
+    }
 
 
     public void myOnCreate() {
+      if (enableOpenCV) {
         Log.i(TAG, "called onCreate");
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.HelloOpenCvView);
-        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
-        mOpenCvCameraView.setCvCameraViewListener(this);
-        mOpenCvCameraView.enableView();
+      }
     }
 
     public void myOnResume() {
+      if (enableOpenCV) {
         if (!OpenCVLoader.initDebug()) {
-            Log.e(TAG, "  OpenCVLoader.initDebug(), not working.");
+          Log.e(TAG, "  OpenCVLoader.initDebug(), not working.");
         } else {
-            Log.i(TAG, "  OpenCVLoader.initDebug(), working.");
+          Log.i(TAG, "  OpenCVLoader.initDebug(), working.");
         }
+      }
     }
 
     public void myOnPause() {
+      if (enableOpenCV) {
         if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
+          mOpenCvCameraView.disableView();
+      }
     }
 
     public void myOnDestroy() {
+      if (enableOpenCV) {
         if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
+          mOpenCvCameraView.disableView();
+      }
     }
 
 
