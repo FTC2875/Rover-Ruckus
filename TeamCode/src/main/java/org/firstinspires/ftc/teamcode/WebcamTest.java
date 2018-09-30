@@ -38,6 +38,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.util.ThreadPool;
 import com.vuforia.Frame;
+import com.vuforia.Image;
 import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 
@@ -203,6 +204,7 @@ public class WebcamTest extends LinearOpMode {
 
         // Beginning of Custom Vuforia Code
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
+        vuforia.setFrameQueueCapacity(5);
 
         /**
          * We use units of mm here because that's the recommended units of measurement for the
@@ -404,7 +406,11 @@ public class WebcamTest extends LinearOpMode {
         while (opModeIsActive()) {
 
             if (gamepad1.a && !buttonPressed) {
-                captureFrameToFile();
+                try {
+                    vuforiatoCV();
+                } catch (InterruptedException ie) {
+                    Log.e(TAG, "runOpMode: " + ie.getMessage());
+                }
             }
             buttonPressed = gamepad1.a;
 
@@ -489,17 +495,49 @@ public class WebcamTest extends LinearOpMode {
         }));
     }
 
-    private Mat vuforiatoCV() {
-        Mat mat;
+    private Mat vuforiatoCV() throws InterruptedException {
+        Image rgb = null;
+        VuforiaLocalizer.CloseableFrame frame;
 
-        vuforia.getFrameOnce(Continuation.create(ThreadPool.getDefault(), new Consumer<Frame>() {
-            @Override
-            public void accept(Frame value) {
-                Bitmap imageBit = vuforia.convertFrameToBitmap(value);
-                Mat convertedMat = new Mat(imageBit.getWidth(), imageBit.getHeight(), CvType.CV_8UC4);
 
-                Utils.bitmapToMat(imageBit, convertedMat);
+            frame = vuforia.getFrameQueue().take();
+            //takes the frame at the head of the queue
+            long numImages = frame.getNumImages();
+
+            for (int i = 0; i < numImages; i++) {
+                if (frame.getImage(i).getFormat() == PIXEL_FORMAT.RGB565) {
+                    rgb = frame.getImage(i);
+                    break;
+                }
             }
-        }));
+
+            /*rgb is now the Image object that weve used in the video*/
+            Bitmap bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
+            bm.copyPixelsFromBuffer(rgb.getPixels());
+
+            //put the image into a MAT for OpenCV
+            Mat tmp = new Mat(rgb.getWidth(), rgb.getHeight(), CvType.CV_8UC4);
+            Utils.bitmapToMat(bm, tmp);
+
+            // save bitmap to file
+        if (bm != null) {
+            File file = new File(captureDirectory, String.format(Locale.getDefault(), "VuforiaFrameToOpenCV-%d.png", captureCounter++));
+            try {
+                FileOutputStream outputStream = new FileOutputStream(file);
+                try {
+                    bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                } finally {
+                    outputStream.close();
+                    telemetry.log().add("captured %s", file.getName());
+                }
+            } catch (IOException e) {
+                RobotLog.ee(TAG, e, "exception in saving opencv frame()");
+            }
+        } else {
+            Log.e(TAG, "vuforiatoCV: Error: Bitmap is null");
+        }
+
+            return tmp;
+
     }
 }
