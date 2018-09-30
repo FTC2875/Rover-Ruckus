@@ -40,6 +40,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.wifi.WifiManager;
@@ -58,6 +59,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -124,10 +126,14 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import vision.FrameGrabber;
+import vision.SimpleFrameOutputter;
 
 @SuppressWarnings("WeakerAccess")
 public class FtcRobotControllerActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2
@@ -176,8 +182,22 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
   protected MotionDetection motionDetection;
 
   private static CameraBridgeViewBase mOpenCvCameraView;
+  private static ImageView imageDemo;
+
+  private static final int FRAME_WIDTH_REQUEST = 680;
+  private static final int FRAME_HEIGHT_REQUEST = 680;
 
   private boolean enableOpenCV = false;
+
+  public static FrameGrabber frameGrabber;
+
+  public static void setDemoImage(Mat img) {
+    Bitmap bmp = Bitmap.createBitmap(img.width(), img.height(), Bitmap.Config.RGB_565);
+
+    Utils.matToBitmap(img, bmp);
+
+    imageDemo.setImageBitmap(bmp);
+  }
 
   public static void setOpenCvListener (CameraBridgeViewBase.CvCameraViewListener2 listener) {
     mOpenCvCameraView.setCvCameraViewListener(listener);
@@ -200,7 +220,12 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
       if (enableOpenCV) {
         Log.i(TAG, "called onCreate");
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.HelloOpenCvView);
+//        frameGrabber = new FrameGrabber(mOpenCvCameraView, FRAME_WIDTH_REQUEST, FRAME_HEIGHT_REQUEST);
+//        frameGrabber.setImageProcessor();
+//        frameGrabber.setSaveImages(true);
       }
+
+      imageDemo = (ImageView) findViewById(R.id.imageDemoView);
     }
 
     public void myOnResume() {

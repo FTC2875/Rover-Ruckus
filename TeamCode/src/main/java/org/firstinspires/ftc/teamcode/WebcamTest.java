@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Bitmap;
 import android.util.Log;
+import android.view.View;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -41,6 +42,7 @@ import com.vuforia.Frame;
 import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
@@ -66,6 +68,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import vision.SimpleFrameOutputter;
 
 /**
  * This 2016-2017 OpMode illustrates the basics of using the Vuforia localizer to determine
@@ -404,7 +408,13 @@ public class WebcamTest extends LinearOpMode {
         while (opModeIsActive()) {
 
             if (gamepad1.a && !buttonPressed) {
-                captureFrameToFile();
+                try {
+                    Mat img = vuforiatoCV();
+                    FtcRobotControllerActivity.setDemoImage(img);
+                } catch (Exception e) {
+                    Log.e(TAG, "Mat-OpenCV Error:" + e.getMessage());
+                }
+
             }
             buttonPressed = gamepad1.a;
 
@@ -490,16 +500,23 @@ public class WebcamTest extends LinearOpMode {
     }
 
     private Mat vuforiatoCV() {
-        Mat mat;
+        Mat mat = null;
 
         vuforia.getFrameOnce(Continuation.create(ThreadPool.getDefault(), new Consumer<Frame>() {
             @Override
             public void accept(Frame value) {
+                if (value == null) {
+                    Log.e(TAG, "Frame Value is Null");
+                    return;
+                }
+
                 Bitmap imageBit = vuforia.convertFrameToBitmap(value);
                 Mat convertedMat = new Mat(imageBit.getWidth(), imageBit.getHeight(), CvType.CV_8UC4);
 
                 Utils.bitmapToMat(imageBit, convertedMat);
             }
         }));
+
+        return mat;
     }
 }

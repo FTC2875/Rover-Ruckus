@@ -185,6 +185,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         opencv:show_fps="true"
         opencv:camera_id="any" />
 
+    <ImageView
+        android:id="@+id/imageDemoView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="162dp"
+        android:src="@android:drawable/presence_online" />
+
   </RelativeLayout>
 
   <WebView
