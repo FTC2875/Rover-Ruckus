@@ -58,6 +58,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -177,7 +178,8 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 
   private static CameraBridgeViewBase mOpenCvCameraView;
 
-  private boolean enableOpenCV = false;
+  private boolean enableOpenCV = true;
+  private static ImageView demoView;
 
   public static void setOpenCvListener (CameraBridgeViewBase.CvCameraViewListener2 listener) {
     mOpenCvCameraView.setCvCameraViewListener(listener);
@@ -200,7 +202,12 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
       if (enableOpenCV) {
         Log.i(TAG, "called onCreate");
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.HelloOpenCvView);
+        demoView = (ImageView) findViewById(R.id.demoView);
       }
+    }
+
+    public static ImageView getDemoView() {
+      return demoView;
     }
 
     public void myOnResume() {
