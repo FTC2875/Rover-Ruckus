@@ -3,6 +3,15 @@ package vision;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
+/**
+ * Stores the result of the Yellow Block Processing
+ * Results are held in a 3 long array of Mats
+ *
+ * 1st Mat: HSV-thresholded image
+ * 2nd Mat: Normal camera image with with point on center yellow block if it finds it
+ * 3rd Mat: Image of just the contours that OpenCV detects from the thresholded image
+ *
+ */
 public class YellowBlockResult {
     private Mat[] results;
     private double blockArea;

@@ -60,7 +60,7 @@ public class YellowBlockAnaylzer {
             int centerY = (int) (contourMoments.get_m01() / contourMoments.get_m00());
 
             Point center = new Point(centerX, centerY);
-            Imgproc.circle(image, center, 5, new Scalar(100, 100, 100));
+            Imgproc.circle(image, center, 5, new Scalar(150, 8, 206), 15);
 
             return new YellowBlockResult(thresholded, image, matOnlyContours, area, center);
         } else {

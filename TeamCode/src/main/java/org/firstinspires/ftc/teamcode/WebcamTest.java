@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import vision.VisionController;
 import vision.YellowBlockAnaylzer;
 import vision.YellowBlockResult;
 
@@ -131,7 +132,12 @@ public class WebcamTest extends LinearOpMode {
     WebcamName webcamName;
 
     // stores the data about the yellow block location
-    YellowBlockResult result;
+    private YellowBlockResult result;
+
+    // allows us to interact with vision controller
+    private VisionController vision;
+
+
 
     @Override public void runOpMode() {
 
@@ -411,46 +417,26 @@ public class WebcamTest extends LinearOpMode {
         /** Start tracking the data sets we care about. */
         roverRuckusTargets.activate();
 
-        result = new YellowBlockResult();
-        int resultMatIndex = 0;
 
         boolean buttonPressed = false;
+
+        vision = new VisionController(vuforia, FtcRobotControllerActivity.getDemoView());
+        result = new YellowBlockResult();
+
         while (opModeIsActive()) {
 
             if (gamepad1.a && !buttonPressed) {
-                processFrame();
+                vision.processFrame();
+                result = vision.getResult();
             }
 
-            if (gamepad1.b && !buttonPressed) {
-                if (result.isFoundBlock()) {
-                    if (resultMatIndex == 2)
-                        resultMatIndex = 0;
-                    else
-                        resultMatIndex++;
-
-                    Mat resultImage = result.getResults()[resultMatIndex];
-                    if (resultImage.width() > 0 && resultImage.height() > 0) {
-                        Bitmap bitmapResultImage = matToBitmap(resultImage);
-                        setDemoImage(bitmapResultImage);
-                    }
-
-
-                } else {                              // no block found, show openCV image
-                    if (result.getResults().length > 0) {
-                        Mat resultImage = result.getResults()[0];
-
-                        if (resultImage.width() > 0 && resultImage.height() > 0) {
-                            Bitmap bitmapResultImage = matToBitmap(resultImage);
-                            setDemoImage(bitmapResultImage);
-                        }
-
-                        telemetry.addData("Image Processor: ", "Did not find block");
-                    }
-                }
+            if ((gamepad1.b && !buttonPressed)) {
+                vision.swapDemos();
             }
+
 
             if (gamepad1.y && !buttonPressed) {
-                toggleDemoView();
+                vision.toggleDemoView();
             }
             buttonPressed = gamepad1.a || gamepad1.b || gamepad1.y;
 
@@ -509,17 +495,7 @@ public class WebcamTest extends LinearOpMode {
         return transformationMatrix.formatAsTransform();
     }
 
-    private void processFrame() {
-        try {
-            result.releaseResults(); // clear up Mat memory
 
-            Mat mat = vuforiatoCV();
-            YellowBlockAnaylzer processor = new YellowBlockAnaylzer(mat);
-            result = processor.process();
-        } catch (InterruptedException ie) {
-            Log.e(TAG, "runOpMode: " + ie.getMessage());
-        }
-    }
 
     /**
      * Sample one frame from the Vuforia stream and write it to a .PNG image file on the robot
@@ -553,7 +529,7 @@ public class WebcamTest extends LinearOpMode {
         }));
     }
 
-    private void  saveMat(Bitmap bm) {
+    private void saveMat(Bitmap bm) {
         // save bitmap to file
         if (bm != null) {
             File file = new File(captureDirectory, String.format(Locale.getDefault(), "VuforiaFrameToOpenCV-%d.png", captureCounter++));
@@ -573,74 +549,4 @@ public class WebcamTest extends LinearOpMode {
         }
     }
 
-    private Mat vuforiatoCV() throws InterruptedException {
-        Image rgb = null;
-        VuforiaLocalizer.CloseableFrame frame;
-
-
-            frame = vuforia.getFrameQueue().take();
-            //takes the frame at the head of the queue
-            long numImages = frame.getNumImages();
-
-            for (int i = 0; i < numImages; i++) {
-                if (frame.getImage(i).getFormat() == PIXEL_FORMAT.RGB565) {
-                    rgb = frame.getImage(i);
-                    break;
-                }
-            }
-
-            /*rgb is now the Image object that weve used in the video*/
-            final Bitmap bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
-            bm.copyPixelsFromBuffer(rgb.getPixels());
-
-            //put the image into a MAT for OpenCV
-            Mat tmp = new Mat(rgb.getWidth(), rgb.getHeight(), CvType.CV_8UC4);
-            Utils.bitmapToMat(bm, tmp);
-
-//            saveMat(bm);
-//            setDemoImage(bm);
-
-            return tmp;
-
-    }
-
-    private Bitmap matToBitmap(Mat mat) {
-        final Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(mat, bm);
-
-        return bm;
-    }
-
-    // changes the demo view to the given bitmap
-    private void setDemoImage(Bitmap bm) {
-        final ImageView demoView = FtcRobotControllerActivity.getDemoView();
-        final Bitmap bmFinal = bm;
-
-        demoView.post(new Runnable() {
-            @Override
-            public void run() {
-                demoView.setImageBitmap(bmFinal);
-            }
-        });
-    }
-
-    private void toggleDemoView() {
-        final ImageView demoView = FtcRobotControllerActivity.getDemoView();
-
-        if (demoView.getVisibility() == View.VISIBLE) {
-            demoView.post(new Runnable() {
-                @Override
-                public void run() {
-                    demoView.setVisibility(View.INVISIBLE);
-                }
-            });
-        } else {
-            demoView.post(new Runnable() {
-                @Override
-                public void run() {
-                    demoView.setVisibility(View.VISIBLE);
-                }
-            });
-        }
-    }
 }
