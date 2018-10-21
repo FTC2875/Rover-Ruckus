@@ -27,7 +27,7 @@ public class MecanumRobotTeleop extends OpMode {
 
     private MecanumDrivetrain drivetrain;
 
-    private final double SLOW_FACTOR = 0.40;
+    private final double FAST_FACTOR = 3;
 
     /**
      * User defined init method
@@ -69,9 +69,23 @@ public class MecanumRobotTeleop extends OpMode {
         double rotation = -gamepad1.left_stick_x;
         double velocity = Math.hypot(gamepad1.right_stick_x, gamepad1.right_stick_y);
 
+        // limit the velocity and rotational velocity since its so STRONG
+        if (velocity > 0.25)
+            velocity = 0.25;
+
+        if (rotation < -0.25)
+            rotation = -0.25;
+        else if (rotation > 0.25)
+            rotation = 0.25;
+
+        // this is dangerous
         if (gamepad1.left_bumper) {
-            velocity *= SLOW_FACTOR;
+            velocity *= FAST_FACTOR;
+            rotation *= FAST_FACTOR;
         }
+
+
+
 
         drivetrain.setCourse(course);
         drivetrain.setVelocity(velocity);

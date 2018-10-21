@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import edu.spa.ftclib.internal.controller.ErrorTimeThresholdFinishingAlgorithm;
 import edu.spa.ftclib.internal.controller.FinishableIntegratedController;
@@ -20,7 +21,7 @@ import edu.spa.ftclib.internal.sensor.IntegratingGyroscopeSensor;
  * Tested and found fully functional by Gabriel on 2018-8-4.
  */
 
-@Autonomous(name = "Mecanum Auto", group = "sample")
+@Autonomous(name = "Mecanum Auto Demo", group = "sample")
 
 public class MecanumGyroAuto extends LinearOpMode {
     public DcMotor frontLeft;
@@ -44,10 +45,10 @@ public class MecanumGyroAuto extends LinearOpMode {
      */
     @Override
     public void runOpMode() throws InterruptedException {   //Notice that this is almost the exact same code as in HeadingableOmniwheelRotationAutonomous.
-        frontLeft = hardwareMap.get(DcMotor.class, "driveFrontLeft");
-        frontRight = hardwareMap.get(DcMotor.class, "driveFrontRight");
-        backLeft = hardwareMap.get(DcMotor.class, "driveBackLeft");
-        backRight = hardwareMap.get(DcMotor.class, "driveBackRight");
+        frontLeft = hardwareMap.get(DcMotor.class, "flMotor");
+        frontRight = hardwareMap.get(DcMotor.class, "frMotor");
+        backLeft = hardwareMap.get(DcMotor.class, "blMotor");
+        backRight = hardwareMap.get(DcMotor.class, "brMotor");
 
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -61,34 +62,46 @@ public class MecanumGyroAuto extends LinearOpMode {
         while (!imu.isGyroCalibrated());
 
 
-        PIDController pid = new PIDController(1.5, 0.05, 0);
+        PIDController pid = new PIDController(0.1, 0.05, 0);
         pid.setMaxErrorForIntegral(0.002);
 
         controller = new FinishableIntegratedController(new IntegratingGyroscopeSensor(imu), pid, new ErrorTimeThresholdFinishingAlgorithm(Math.PI/50, 1));
         drivetrain = new HeadingableMecanumDrivetrain(new DcMotor[]{frontLeft,frontRight, backLeft, backRight}, controller);
-        for (DcMotor motor : drivetrain.motors) motor.setDirection(DcMotor.Direction.REVERSE);  //Depending on the design of the robot, you may need to comment this line out.
+
+        // change motor directions, taken from telop file
+        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        for (DcMotor motor : drivetrain.motors) telemetry.addData("Motor Direction: ", motor.getDirection());
+        telemetry.update();
+
         for (DcMotor motor : drivetrain.motors) motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         waitForStart();
 
         drivetrain.setTargetHeading(Math.PI/2);
-        while (drivetrain.isRotating()) {
+        while (drivetrain.isRotating() && opModeIsActive()) {
             drivetrain.updateHeading();
             doTelemetry();
         }
-        //drivetrain.rotate();
-        sleep(1000);
 
-        drivetrain.setTargetHeading(-Math.PI/2);
-        while (drivetrain.isRotating()) {
-            drivetrain.updateHeading();
-            telemetry.addData("Heading", drivetrain.getCurrentHeading());
-            telemetry.update();
-        }
-        sleep(1000);
+//        sleep(1000);
+//
+//        drivetrain.setTargetHeading(-Math.PI/2);
+//        while (drivetrain.isRotating()) {
+//            drivetrain.updateHeading();
+//            telemetry.addData("Heading", drivetrain.getCurrentHeading());
+//            telemetry.update();
+//        }
+//        sleep(1000);
+
 
         drivetrain.setTargetHeading(0);
-        while (opModeIsActive()) drivetrain.updateHeading();
+
+        while (opModeIsActive()) {
+
+        }
     }
 
     void doTelemetry() {

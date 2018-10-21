@@ -17,8 +17,15 @@ import java.util.List;
 public class YellowBlockAnaylzer {
     private final String TAG = "Yellow Block Processor";
     private Mat image;
-    private final static Scalar lowerBounds = new Scalar(22, 81, 50);
+    private final static Scalar lowerBounds = new Scalar(18, 134, 45);
     private final static Scalar upperBounds = new Scalar(30, 255, 255);
+
+    // outdated values
+//    private final static Scalar lowerBounds = new Scalar(22, 81, 0);
+//    private final static Scalar upperBounds = new Scalar(30, 255, 255);
+
+    // low (18, 134, 45)
+    // upper (30, 255, 255)
 
     public YellowBlockAnaylzer(Mat image) {
         this.image = image;

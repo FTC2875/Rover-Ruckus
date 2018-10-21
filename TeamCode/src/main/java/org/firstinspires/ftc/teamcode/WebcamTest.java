@@ -438,7 +438,12 @@ public class WebcamTest extends LinearOpMode {
             if (gamepad1.y && !buttonPressed) {
                 vision.toggleDemoView();
             }
-            buttonPressed = gamepad1.a || gamepad1.b || gamepad1.y;
+
+            if (gamepad1.x && !buttonPressed) {
+                captureFrameToFile();
+            }
+
+            buttonPressed = gamepad1.a || gamepad1.b || gamepad1.y || gamepad1.x;
 
             for (VuforiaTrackable trackable : allTrackables) {
                 /**
@@ -459,6 +464,7 @@ public class WebcamTest extends LinearOpMode {
                 telemetry.addData("Block", result.getBlockArea());
                 telemetry.addData("CenterX: ", result.getPoint().x);
                 telemetry.addData("CenterY: ", result.getPoint().y);
+                telemetry.addData("Image Dimensions: ", vision.getDimensions());
             }
 
             /**

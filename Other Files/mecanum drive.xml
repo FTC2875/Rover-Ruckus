@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot type="FirstInspires-FTC">
+    <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQ175A7Q" parentModuleAddress="1">
+        <LynxModule name="Expansion Hub 2" port="2">
+            <NeveRest20Gearmotor name="brMotor" port="0" />
+            <NeveRest20Gearmotor name="blMotor" port="1" />
+            <NeveRest20Gearmotor name="frMotor" port="2" />
+            <NeveRest20Gearmotor name="flMotor" port="3" />
+            <LynxEmbeddedIMU name="imu" port="0" bus="0" />
+        </LynxModule>
+    </LynxUsbDevice>
+    <Webcam name="Webcam 1" serialNumber="D6EBA26F" />
+</Robot>

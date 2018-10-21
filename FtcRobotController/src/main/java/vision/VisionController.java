@@ -25,12 +25,18 @@ public class VisionController {
     private YellowBlockResult result;
     private int resultMatIndex;
 
+    private int width;
+    private int height;
+
     private ImageView demoView;
 
     public VisionController(VuforiaLocalizer vuforia, ImageView demoView) {
         this.vuforia = vuforia;
         this.demoView = demoView;
         result = new YellowBlockResult(); // intializes empty result with empty mat array
+
+        width = 0;
+        height = 0;
 
         resultMatIndex = 0;
     }
@@ -51,6 +57,9 @@ public class VisionController {
                 break;
             }
         }
+
+        this.width = rgb.getWidth();
+        this.height = rgb.getHeight();
 
         /*rgb is now the Image object that weve used in the video*/
         final Bitmap bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
@@ -119,6 +128,18 @@ public class VisionController {
         } catch (InterruptedException ie) {
             Log.e(TAG, "runOpMode: " + ie.getMessage());
         }
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public String getDimensions() {
+        return "(" + width + "," + height + ")";
     }
 
     public void swapDemos() {
