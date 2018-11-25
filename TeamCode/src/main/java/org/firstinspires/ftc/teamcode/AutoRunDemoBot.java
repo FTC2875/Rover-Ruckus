@@ -87,6 +87,8 @@ public class AutoRunDemoBot extends LinearOpMode {
      *
      * @throws InterruptedException
      */
+
+    private boolean firstScan = true;
     @Override
     public void runOpMode() throws InterruptedException {   //Notice that this is almost the exact same code as in HeadingableOmniwheelRotationAutonomous.
         frontLeft = hardwareMap.get(DcMotor.class, "flmotor");
@@ -252,41 +254,75 @@ public class AutoRunDemoBot extends LinearOpMode {
 
         while (opModeIsActive()) {
             orientYellowBlock();
-            moveForward(0.3, 3000);
+            moveForward(0.30, 1000);
             return;
         }
     }
-
+    private int orientYellowBlockI = 0;
     private void orientYellowBlock() {
         vision.processFrame();
         result = vision.getResult();
 
-        if (!result.isFoundBlock() || result.getBlockArea() < 2800); // value of minimum block size, can change
-        // DO SOMETHING THIS MEANS NOTHING WAS FOUND
+        if (!opModeIsActive()) return;
+
+        if (!result.isFoundBlock() || result.getBlockArea() < 2000)  { // value of minimum block size, can change
+            if (firstScan) {
+
+                if (orientYellowBlockI % 2 == 0)
+                    pivotLeft(0.2, 500 + (orientYellowBlockI * 50)); // increases duration of pivot every single iteration
+                else
+                    pivotRight(0.2, 500 + (orientYellowBlockI * 50));
+
+                sleep(500);
+                orientYellowBlockI++;
+                orientYellowBlock();
+            } else { // we're right in front of the block, this is good
+                return;
+            }
+        }
+
 
         telemetry.addData("center: ", result.getPoint().x);
         telemetry.addData("area: ", result.getBlockArea());
+
+//        // threshold for how "centered" robot is from 400
+//        if (result.getPoint().x > 515 && opModeIsActive()) {
+//            // too far left, rotate right
+//            frontLeft.setPower(0.15);
+//            frontRight.setPower(-0.15);
+//
+//            orientYellowBlock();
+//        } else if (result.getPoint().x < 485 && opModeIsActive()) {
+//            // too far right, rotate left
+//            frontLeft.setPower(-0.15);
+//            frontRight.setPower(0.15);
+//
+//            orientYellowBlock();
+//        } else {
+//            // perfectly aligned
+//
+//            stopMotors();
+//            return;
+//        }
+
+        double kP = 0.005;
+
+        double error = result.getPoint().x - 500;
+        double motorGain = error * kP;
+
+        double motorPower = 0.15;
+
+        frontLeft.setPower(motorPower + motorPower * motorGain);
+        frontRight.setPower(motorPower);
+
+        telemetry.addData("Error: ", error);
+        telemetry.addData("Gain: ", motorGain);
+        telemetry.addData("Motor Power: ", motorPower + motorPower * motorGain);
         telemetry.update();
 
-        // threshold for how "centered" robot is from 400
-        if (result.getPoint().x > 515 && opModeIsActive()) {
-            // too far left, rotate right
-            frontLeft.setPower(0.15);
-            frontRight.setPower(-0.15);
+        firstScan = false;
+        orientYellowBlock();
 
-            orientYellowBlock();
-        } else if (result.getPoint().x < 485 && opModeIsActive()) {
-            // too far right, rotate left
-            frontLeft.setPower(-0.15);
-            frontRight.setPower(0.15);
-
-            orientYellowBlock();
-        } else {
-            // perfectly aligned
-
-            stopMotors();
-            return;
-        }
     }
 
     // temporary move functions
