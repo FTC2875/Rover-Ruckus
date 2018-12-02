@@ -21,7 +21,7 @@ public class YellowBlockAnaylzer {
     private final static Scalar lowerBounds = new Scalar(18, 134, 45);
     private final static Scalar upperBounds = new Scalar(30, 255, 255);
 
-    private final static int CROP_AMT = 300;
+    private final static int CROP_AMT = 100;
 
     // outdated values
 //    private final static Scalar lowerBounds = new Scalar(22, 81, 0);
@@ -38,7 +38,7 @@ public class YellowBlockAnaylzer {
         Log.i(TAG, "Starting to image process ball");
 
         // crop image
-        Rect croppedArea = new Rect(0, 0, image.width(), image.height());
+        Rect croppedArea = new Rect(0, CROP_AMT, image.width(), image.height()-CROP_AMT);
         Mat croppedImage = new Mat(image, croppedArea);
 
         Mat hsvImage = croppedImage.clone();

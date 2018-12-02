@@ -53,8 +53,14 @@ public class BuddyBotTeleop extends LinearOpMode {
             // lift mechanism
             if (gamepad1.dpad_up) {
                 lift.setPower(0.75);
+
+                telemetry.addData("servo pos: ", lift.getController().getServoPosition(1));
+                telemetry.update();
             } else if (gamepad1.dpad_down) {
                 lift.setPower(-0.75);
+
+                telemetry.addData("servo pos: ", lift.getController().getServoPosition(1));
+                telemetry.update();
             } else {
                 lift.setPower(0);
             }
@@ -69,9 +75,9 @@ public class BuddyBotTeleop extends LinearOpMode {
             }
 
             //flipper mechanism
-            if (gamepad1.y && !buttonPressed) {
+            if (gamepad1.y) {
                 double curPos = bucketFlipper.getPosition();
-                double newPos = curPos + 0.01;
+                double newPos = curPos + 0.005;
 
                 telemetry.addData("new pos: ", newPos);
                 telemetry.addData("cur pos: ", curPos);
@@ -79,21 +85,24 @@ public class BuddyBotTeleop extends LinearOpMode {
 
                 if (newPos < 1)
                     bucketFlipper.setPosition(newPos);
-            } else if (gamepad1.a && !buttonPressed) {
+
+            } else if (gamepad1.a) {
                 double curPos = bucketFlipper.getPosition();
-                double newPos = curPos - 0.01;
+                double newPos = curPos - 0.005;
 
                 telemetry.addData("new pos: ", newPos);
                 telemetry.addData("cur pos: ", curPos);
                 telemetry.update();
 
-                if (newPos > 0)
+                if (newPos > 0.1)
                     bucketFlipper.setPosition(newPos);
+
             }
+
             buttonPressed = gamepad1.y || gamepad1.a;
 
-            leftDriveMotor.setPower(gamepad1.left_stick_y * slowFactor);
-            rightDriveMotor.setPower(gamepad1.right_stick_y * slowFactor);
+            leftDriveMotor.setPower(-gamepad1.left_stick_y * slowFactor);
+            rightDriveMotor.setPower(-gamepad1.right_stick_y * slowFactor);
 
             telemetry.addData("servo pos", bucketFlipper.getPosition());
             telemetry.update();

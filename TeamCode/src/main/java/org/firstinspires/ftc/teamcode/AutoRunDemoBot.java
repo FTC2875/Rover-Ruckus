@@ -265,8 +265,11 @@ public class AutoRunDemoBot extends LinearOpMode {
 
         if (!opModeIsActive()) return;
 
-        if (!result.isFoundBlock() || result.getBlockArea() < 2000)  { // value of minimum block size, can change
+        if (!result.isFoundBlock() || result.getBlockArea() < 1000)  { // value of minimum block size, can change
             if (firstScan) {
+
+                telemetry.addData("area: ", result.getBlockArea());
+                telemetry.update();
 
                 if (orientYellowBlockI % 2 == 0)
                     pivotLeft(0.2, 500 + (orientYellowBlockI * 50)); // increases duration of pivot every single iteration
@@ -280,6 +283,8 @@ public class AutoRunDemoBot extends LinearOpMode {
                 return;
             }
         }
+
+        if (result.getBlockArea() > 20000) return; // in front of block
 
 
         telemetry.addData("center: ", result.getPoint().x);
@@ -307,7 +312,7 @@ public class AutoRunDemoBot extends LinearOpMode {
 
         double kP = 0.005;
 
-        double error = result.getPoint().x - 500;
+        double error = result.getPoint().x - 250;
         double motorGain = error * kP;
 
         double motorPower = 0.15;
