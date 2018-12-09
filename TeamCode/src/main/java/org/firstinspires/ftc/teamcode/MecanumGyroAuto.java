@@ -45,10 +45,10 @@ public class MecanumGyroAuto extends LinearOpMode {
      */
     @Override
     public void runOpMode() throws InterruptedException {   //Notice that this is almost the exact same code as in HeadingableOmniwheelRotationAutonomous.
-        frontLeft = hardwareMap.get(DcMotor.class, "flMotor");
-        frontRight = hardwareMap.get(DcMotor.class, "frMotor");
-        backLeft = hardwareMap.get(DcMotor.class, "blMotor");
-        backRight = hardwareMap.get(DcMotor.class, "brMotor");
+        frontLeft = hardwareMap.get(DcMotor.class, "fl");
+        frontRight = hardwareMap.get(DcMotor.class, "fr");
+        backLeft = hardwareMap.get(DcMotor.class, "bl");
+        backRight = hardwareMap.get(DcMotor.class, "br");
 
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -62,17 +62,12 @@ public class MecanumGyroAuto extends LinearOpMode {
         while (!imu.isGyroCalibrated());
 
 
-        PIDController pid = new PIDController(0.1, 0.05, 0);
+        PIDController pid = new PIDController(0.4, 0.1, 0);
         pid.setMaxErrorForIntegral(0.002);
 
         controller = new FinishableIntegratedController(new IntegratingGyroscopeSensor(imu), pid, new ErrorTimeThresholdFinishingAlgorithm(Math.PI/50, 1));
         drivetrain = new HeadingableMecanumDrivetrain(new DcMotor[]{frontLeft,frontRight, backLeft, backRight}, controller);
 
-        // change motor directions, taken from telop file
-        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRight.setDirection(DcMotorSimple.Direction.REVERSE);
         for (DcMotor motor : drivetrain.motors) telemetry.addData("Motor Direction: ", motor.getDirection());
         telemetry.update();
 
@@ -86,18 +81,22 @@ public class MecanumGyroAuto extends LinearOpMode {
             doTelemetry();
         }
 
-//        sleep(1000);
-//
-//        drivetrain.setTargetHeading(-Math.PI/2);
-//        while (drivetrain.isRotating()) {
-//            drivetrain.updateHeading();
-//            telemetry.addData("Heading", drivetrain.getCurrentHeading());
-//            telemetry.update();
-//        }
-//        sleep(1000);
+        sleep(1000);
+
+        drivetrain.setTargetHeading(-Math.PI/2);
+        while (drivetrain.isRotating()) {
+            drivetrain.updateHeading();
+            doTelemetry();
+        }
+
+        sleep(1000);
 
 
         drivetrain.setTargetHeading(0);
+        sleep(1000);
+
+        drivetrain.setTargetPosition(500);
+        drivetrain.setVelocity(1.5);
 
         while (opModeIsActive()) {
 

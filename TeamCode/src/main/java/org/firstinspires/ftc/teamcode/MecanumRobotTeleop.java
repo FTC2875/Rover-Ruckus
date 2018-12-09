@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import edu.spa.ftclib.internal.drivetrain.MecanumDrivetrain;
 
@@ -27,7 +28,10 @@ public class MecanumRobotTeleop extends OpMode {
 
     private MecanumDrivetrain drivetrain;
 
-    private final double FAST_FACTOR = 3;
+    private final double FAST_FACTOR = 3; // max: 0.75
+    boolean motorsOn;
+    double startTime;
+
 
     /**
      * User defined init method
@@ -36,17 +40,17 @@ public class MecanumRobotTeleop extends OpMode {
      */
     @Override
     public void init() {
-        frontLeft = hardwareMap.get(DcMotor.class, "flMotor");
-        frontRight = hardwareMap.get(DcMotor.class, "frMotor");
-        backLeft = hardwareMap.get(DcMotor.class, "blMotor");
-        backRight = hardwareMap.get(DcMotor.class, "brMotor");
+        frontLeft = hardwareMap.get(DcMotor.class, "fl");
+        frontRight = hardwareMap.get(DcMotor.class, "fr");
+        backLeft = hardwareMap.get(DcMotor.class, "bl");
+        backRight = hardwareMap.get(DcMotor.class, "br");
 
         motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
 
-        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRight.setDirection(DcMotorSimple.Direction.REVERSE);
+//        frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+//        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+//        backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+//        backRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         telemetry.addData("Direction Key: ", "Front left, Front Right, Back Left, Back Right");
         for (DcMotor motor : motors) {
@@ -56,6 +60,7 @@ public class MecanumRobotTeleop extends OpMode {
         drivetrain = new MecanumDrivetrain(motors);
 
         telemetry.update();
+        startTime = 0;
     }
 
     /**
@@ -65,7 +70,7 @@ public class MecanumRobotTeleop extends OpMode {
      */
     @Override
     public void loop() {
-        double course = Math.atan2(-gamepad1.right_stick_y, -gamepad1.right_stick_x) - Math.PI/2;
+        double course = Math.atan2(-gamepad1.right_stick_y, gamepad1.right_stick_x) - Math.PI/2;
         double rotation = -gamepad1.left_stick_x;
         double velocity = Math.hypot(gamepad1.right_stick_x, gamepad1.right_stick_y);
 
@@ -85,11 +90,23 @@ public class MecanumRobotTeleop extends OpMode {
         }
 
 
-
-
         drivetrain.setCourse(course);
         drivetrain.setVelocity(velocity);
         drivetrain.setRotation(rotation);
+
+//        frontRight.setPower(gamepad1.right_stick_y);
+//        backRight.setPower(gamepad1.right_stick_y);
+//
+//        frontLeft.setPower(gamepad1.left_stick_y);
+//        backLeft.setPower(gamepad1.left_stick_y);
+
+
+
+
+        telemetry.addData("front right pos: ", frontRight.getCurrentPosition());
+        telemetry.addData("back right pos: ", backRight.getCurrentPosition());
+        telemetry.addData("front left pos: ", frontLeft.getCurrentPosition());
+        telemetry.addData("back left pos: ", backLeft.getCurrentPosition());
 
         telemetry.addData("course", course);
         telemetry.addData("velocity", velocity);
