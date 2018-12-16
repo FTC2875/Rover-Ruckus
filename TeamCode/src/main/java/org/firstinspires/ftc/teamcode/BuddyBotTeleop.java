@@ -18,10 +18,13 @@ public class BuddyBotTeleop extends LinearOpMode {
     private DcMotor rightDriveMotor;
     private DcMotor spinner;
 
-    private CRServo lift;
+    private DcMotor lift;
     private Servo bucketFlipper;
 
     private boolean buttonPressed = false;
+
+    private static final int MAX_LIFT = 3850;
+    private static final int MIN_LIFT = 200;
 
     @Override
     public void runOpMode() {
@@ -29,7 +32,7 @@ public class BuddyBotTeleop extends LinearOpMode {
         rightDriveMotor = hardwareMap.dcMotor.get("rightdrive");
         leftDriveMotor = hardwareMap.dcMotor.get("leftdrive");
         spinner = hardwareMap.dcMotor.get("spinner");
-        lift = hardwareMap.crservo.get("lift");
+        lift = hardwareMap.dcMotor.get("lift");
         bucketFlipper = hardwareMap.servo.get("flipper");
 
         rightDriveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -38,12 +41,15 @@ public class BuddyBotTeleop extends LinearOpMode {
         leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
         rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
 
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         waitForStart();
 
         while (opModeIsActive()) {
 
+            // slow logic
             double slowFactor;
-
             if (gamepad1.left_bumper) {
                 slowFactor = 0.35;
             } else {
@@ -51,24 +57,24 @@ public class BuddyBotTeleop extends LinearOpMode {
             }
 
             // lift mechanism
-            if (gamepad1.dpad_up) {
+            if (gamepad1.dpad_up && lift.getCurrentPosition() < MAX_LIFT) {
                 lift.setPower(0.75);
 
-                telemetry.addData("servo pos: ", lift.getController().getServoPosition(1));
+                telemetry.addData("servo pos: ", lift.getCurrentPosition());
                 telemetry.update();
-            } else if (gamepad1.dpad_down) {
+            } else if (gamepad1.dpad_down && lift.getCurrentPosition() > MIN_LIFT) {
                 lift.setPower(-0.75);
 
-                telemetry.addData("servo pos: ", lift.getController().getServoPosition(1));
+                telemetry.addData("servo pos: ", lift.getCurrentPosition());
                 telemetry.update();
             } else {
                 lift.setPower(0);
             }
 
             // spinner mechanism
-            if (gamepad1.dpad_left) {
+            if (gamepad1.dpad_left || gamepad2.dpad_left) {
                 spinner.setPower(0.5);
-            } else if (gamepad1.dpad_right) {
+            } else if (gamepad1.dpad_right || gamepad2.dpad_right) {
                 spinner.setPower(-0.5);
             } else {
                 spinner.setPower(0);
@@ -101,10 +107,17 @@ public class BuddyBotTeleop extends LinearOpMode {
 
             buttonPressed = gamepad1.y || gamepad1.a;
 
-            leftDriveMotor.setPower(-gamepad1.left_stick_y * slowFactor);
-            rightDriveMotor.setPower(-gamepad1.right_stick_y * slowFactor);
+            if (gamepad1.right_bumper) {
+                leftDriveMotor.setPower(-gamepad1.left_stick_y * slowFactor);
+                rightDriveMotor.setPower(-gamepad1.right_stick_y * slowFactor);
+            } else {
+                leftDriveMotor.setPower(gamepad1.right_stick_y * slowFactor);
+                rightDriveMotor.setPower(gamepad1.left_stick_y * slowFactor);
+            }
+
 
             telemetry.addData("servo pos", bucketFlipper.getPosition());
+            telemetry.addData("lift pos", lift.getCurrentPosition());
             telemetry.update();
 
 
