@@ -46,6 +46,8 @@ public class BuddyBotTeleop extends LinearOpMode {
 
         waitForStart();
 
+        bucketFlipper.setPosition(0.5);
+
         while (opModeIsActive()) {
 
             // slow logic

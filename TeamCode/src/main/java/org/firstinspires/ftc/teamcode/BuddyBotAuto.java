@@ -1,12 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.BNO055IMUImpl;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.vuforia.Frame;
 import com.vuforia.PIXEL_FORMAT;
@@ -28,31 +26,27 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.spa.ftclib.internal.controller.ErrorTimeThresholdFinishingAlgorithm;
-import edu.spa.ftclib.internal.controller.FinishableIntegratedController;
-import edu.spa.ftclib.internal.controller.PIDController;
-import edu.spa.ftclib.internal.drivetrain.HeadingableMecanumDrivetrain;
-import edu.spa.ftclib.internal.sensor.IntegratingGyroscopeSensor;
-import edu.spa.ftclib.sample.robot.HeadingablePushbot;
 import vision.VisionController;
 import vision.YellowBlockResult;
 
-/**
- * Autonomous program using sample code from MecanumGyroAuto.java
- * and ConceptVuforiaNavigationWebcam.java
- */
 
-@Autonomous(name = "Demo Auto Camera")
+@Autonomous(name = "BuddyBot Auto", group = "Linear Opmode")
+// @Autonomous(...) is the other common choice
+public class BuddyBotAuto extends LinearOpMode {
+    public static final String TAG = "BuddyBotAuto";
 
-public class AutoRunDemoBot extends LinearOpMode {
-    public static final String TAG = "MecanumAutoCameraOpMode";
 
-    /**
-     * Movement setup stuff
-     */
-    public DcMotor frontLeft;
-    public DcMotor frontRight;
-    public BNO055IMUImpl imu;
+    private DcMotor frontLeft;
+    private DcMotor frontRight;
+    private DcMotor spinner;
+
+    private DcMotor lift;
+    private Servo bucketFlipper;
+
+    private boolean buttonPressed = false;
+
+    private static final int MAX_LIFT = 3850;
+    private static final int MIN_LIFT = 200;
 
 
 
@@ -79,39 +73,27 @@ public class AutoRunDemoBot extends LinearOpMode {
     // allows us to interact with vision controller
     private VisionController vision;
 
-    /**
-     * Override this method and place your code here.
-     * <p>
-     * Please do not swallow the InterruptedException, as it is used in cases
-     * where the op mode needs to be terminated early.
-     *
-     * @throws InterruptedException
-     */
 
+    // allows for pivoting if yellow block isn't found
     private boolean firstScan = true;
+
     @Override
-    public void runOpMode() throws InterruptedException {   //Notice that this is almost the exact same code as in HeadingableOmniwheelRotationAutonomous.
-        frontLeft = hardwareMap.get(DcMotor.class, "flmotor");
-        frontRight = hardwareMap.get(DcMotor.class, "frmotor");
+    public void runOpMode() {
 
-        imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
-        BNO055IMU.Parameters imuParameters = new BNO055IMU.Parameters();
-        imuParameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        imuParameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        //Add calibration file?
-        imuParameters.loggingEnabled = true;   //For debugging
-        imuParameters.loggingTag = "IMU";      //For debugging
-        imuParameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();  //Figure out why the naive one doesn't have a public constructor
-        imu.initialize(imuParameters);
-        while (!imu.isGyroCalibrated());
+        frontRight = hardwareMap.dcMotor.get("rightdrive");
+        frontLeft = hardwareMap.dcMotor.get("leftdrive");
+        spinner = hardwareMap.dcMotor.get("spinner");
+        lift = hardwareMap.dcMotor.get("lift");
+        bucketFlipper = hardwareMap.servo.get("flipper");
 
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        PIDController pid = new PIDController(0.1, 0.05, 0);
-        pid.setMaxErrorForIntegral(0.002);
+        frontLeft.setDirection(DcMotor.Direction.FORWARD);
+        frontRight.setDirection(DcMotor.Direction.REVERSE);
 
-        // change motor directions, taken from telop file
-        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         /*
          * Retrieve the camera we are to use.
@@ -241,23 +223,17 @@ public class AutoRunDemoBot extends LinearOpMode {
         vision = new VisionController(vuforia, FtcRobotControllerActivity.getDemoView());
         result = new YellowBlockResult();
 
-//        sleep(1000);
-//
-//        drivetrain.setTargetHeading(-Math.PI/2);
-//        while (drivetrain.isRotating()) {
-//            drivetrain.updateHeading();
-//            telemetry.addData("Heading", drivetrain.getCurrentHeading());
-//            telemetry.update();
-//        }
-//        sleep(1000);
-
-
         while (opModeIsActive()) {
+//            moveForward(0.20, 500);
             orientYellowBlock();
-            moveForward(0.30, 1000);
+
+            telemetry.addData("status", "bot correctly positioned, going forward now");
+
+//            moveForward(0.30, 2500);
             return;
         }
     }
+
     private int orientYellowBlockI = 0;
     private void orientYellowBlock() {
         vision.processFrame();
@@ -265,7 +241,7 @@ public class AutoRunDemoBot extends LinearOpMode {
 
         if (!opModeIsActive()) return;
 
-        if (!result.isFoundBlock() || result.getBlockArea() < 1000)  { // value of minimum block size, can change
+        if (!result.isFoundBlock() || result.getBlockArea() < 1000)  { // if block is no longer detected or is too small
             if (firstScan) {
 
                 telemetry.addData("area: ", result.getBlockArea());
@@ -280,26 +256,28 @@ public class AutoRunDemoBot extends LinearOpMode {
                 orientYellowBlockI++;
                 orientYellowBlock();
             } else { // we're right in front of the block, this is good
-                return;
+//                return;
             }
         }
 
-        if (result.getBlockArea() > 20000) return; // in front of block
+//        if (result.getBlockArea() > 20000) return; // in front of block
 
 
         telemetry.addData("center: ", result.getPoint().x);
         telemetry.addData("area: ", result.getBlockArea());
 
 
-        double kP = 0.005;
+        double kP = 0.003;
 
-        double error = result.getPoint().x - 270;
+        double error = result.getPoint().x - 75; // subtract the x coordinate from the "center"
         double motorGain = error * kP;
+
+        if (Math.abs(error) < 20) return;
 
         double motorPower = 0.15;
 
-        frontLeft.setPower(motorPower + motorPower * motorGain);
-        frontRight.setPower(motorPower);
+//        frontRight.setPower(motorPower + (motorPower * motorGain));
+//        frontLeft.setPower(-motorPower);
 
         telemetry.addData("Error: ", error);
         telemetry.addData("Gain: ", motorGain);
@@ -338,13 +316,7 @@ public class AutoRunDemoBot extends LinearOpMode {
         frontLeft.setPower(0);
     }
 
-    /**
-     * A simple utility that extracts positioning information from a transformation matrix
-     * and formats it in a form palatable to a human being.
-     */
     String format(OpenGLMatrix transformationMatrix) {
         return transformationMatrix.formatAsTransform();
     }
-
-
 }
