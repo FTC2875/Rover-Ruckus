@@ -19,7 +19,7 @@ public class BuddyBotTeleop extends LinearOpMode {
     private DcMotor spinner;
 
     private DcMotor lift;
-    private Servo bucketFlipper;
+    private CRServo bucketFlipper;
 
     private boolean buttonPressed = false;
 
@@ -33,7 +33,7 @@ public class BuddyBotTeleop extends LinearOpMode {
         leftDriveMotor = hardwareMap.dcMotor.get("leftdrive");
         spinner = hardwareMap.dcMotor.get("spinner");
         lift = hardwareMap.dcMotor.get("lift");
-        bucketFlipper = hardwareMap.servo.get("flipper");
+        bucketFlipper = hardwareMap.crservo.get("flipper");
 
         rightDriveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftDriveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -46,7 +46,7 @@ public class BuddyBotTeleop extends LinearOpMode {
 
         waitForStart();
 
-        bucketFlipper.setPosition(0.5);
+        double servPow = 0.4;
 
         while (opModeIsActive()) {
 
@@ -75,50 +75,63 @@ public class BuddyBotTeleop extends LinearOpMode {
 
             // spinner mechanism
             if (gamepad1.dpad_left || gamepad2.dpad_left) {
-                spinner.setPower(0.5);
+                spinner.setPower(1);
             } else if (gamepad1.dpad_right || gamepad2.dpad_right) {
-                spinner.setPower(-0.5);
+                spinner.setPower(-1);
             } else {
                 spinner.setPower(0);
             }
 
             //flipper mechanism
             if (gamepad1.y) {
-                double curPos = bucketFlipper.getPosition();
-                double newPos = curPos + 0.005;
+//                double curPos = bucketFlipper.getPosition();
+//                double newPos = curPos + 0.005;
+//
+//                telemetry.addData("new pos: ", newPos);
+//                telemetry.addData("cur pos: ", curPos);
+//                telemetry.update();
+//
+//                if (newPos < 1)
+//                    bucketFlipper.setPosition(newPos);
 
-                telemetry.addData("new pos: ", newPos);
-                telemetry.addData("cur pos: ", curPos);
-                telemetry.update();
-
-                if (newPos < 1)
-                    bucketFlipper.setPosition(newPos);
+                bucketFlipper.setPower(0.70);
 
             } else if (gamepad1.a) {
-                double curPos = bucketFlipper.getPosition();
-                double newPos = curPos - 0.005;
+//                double curPos = bucketFlipper.getPosition();
+//                double newPos = curPos - 0.005;
+//
+//                telemetry.addData("new pos: ", newPos);
+//                telemetry.addData("cur pos: ", curPos);
+//                telemetry.update();
+//
+//                if (newPos > 0.1)
+//                    bucketFlipper.setPosition(newPos);
 
-                telemetry.addData("new pos: ", newPos);
-                telemetry.addData("cur pos: ", curPos);
-                telemetry.update();
+                bucketFlipper.setPower(0);
 
-                if (newPos > 0.1)
-                    bucketFlipper.setPosition(newPos);
-
+            } else {
+                bucketFlipper.setPower(servPow);
             }
 
-            buttonPressed = gamepad1.y || gamepad1.a;
+            // find the stopping point of the CR servo
+//            if (gamepad1.x && !buttonPressed) {
+//                servPow += 0.01;
+//            } else if (gamepad1.b && !buttonPressed) {
+//                servPow -= 0.01;
+//            }
+
+            buttonPressed = gamepad1.y || gamepad1.a || gamepad1.b || gamepad1.x;
 
             if (gamepad1.right_bumper) {
                 leftDriveMotor.setPower(-gamepad1.left_stick_y * slowFactor);
                 rightDriveMotor.setPower(-gamepad1.right_stick_y * slowFactor);
+
             } else {
                 leftDriveMotor.setPower(gamepad1.right_stick_y * slowFactor);
                 rightDriveMotor.setPower(gamepad1.left_stick_y * slowFactor);
             }
 
-
-            telemetry.addData("servo pos", bucketFlipper.getPosition());
+            telemetry.addData("flipper power", bucketFlipper.getPower());
             telemetry.addData("lift pos", lift.getCurrentPosition());
             telemetry.update();
 

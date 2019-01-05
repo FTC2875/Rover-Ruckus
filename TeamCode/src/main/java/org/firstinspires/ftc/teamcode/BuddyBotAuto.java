@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -41,7 +42,7 @@ public class BuddyBotAuto extends LinearOpMode {
     private DcMotor spinner;
 
     private DcMotor lift;
-    private Servo bucketFlipper;
+    private CRServo bucketFlipper;
 
     private boolean buttonPressed = false;
 
@@ -84,7 +85,7 @@ public class BuddyBotAuto extends LinearOpMode {
         frontLeft = hardwareMap.dcMotor.get("leftdrive");
         spinner = hardwareMap.dcMotor.get("spinner");
         lift = hardwareMap.dcMotor.get("lift");
-        bucketFlipper = hardwareMap.servo.get("flipper");
+        bucketFlipper = hardwareMap.crservo.get("flipper");
 
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -229,7 +230,7 @@ public class BuddyBotAuto extends LinearOpMode {
 
             telemetry.addData("status", "bot correctly positioned, going forward now");
 
-//            moveForward(0.30, 2500);
+            moveForward(0.30, 1500);
             return;
         }
     }
@@ -241,7 +242,7 @@ public class BuddyBotAuto extends LinearOpMode {
 
         if (!opModeIsActive()) return;
 
-        if (!result.isFoundBlock() || result.getBlockArea() < 1000)  { // if block is no longer detected or is too small
+        if (!result.isFoundBlock() || result.getBlockArea() > 23000)  { // if block is no longer detected or is too large, we're close
             if (firstScan) {
 
                 telemetry.addData("area: ", result.getBlockArea());
@@ -267,17 +268,15 @@ public class BuddyBotAuto extends LinearOpMode {
         telemetry.addData("area: ", result.getBlockArea());
 
 
-        double kP = 0.003;
+        double kP = 0.005;
 
-        double error = result.getPoint().x - 75; // subtract the x coordinate from the "center"
+        double error = result.getPoint().x - 462; // subtract the x coordinate from the "center"
         double motorGain = error * kP;
 
-        if (Math.abs(error) < 20) return;
+        double motorPower = 0.2;
 
-        double motorPower = 0.15;
-
-//        frontRight.setPower(motorPower + (motorPower * motorGain));
-//        frontLeft.setPower(-motorPower);
+        frontRight.setPower(motorPower); // theoretically pivot on the spot towards the yellow block
+        frontLeft.setPower(motorPower + (motorPower * motorGain));
 
         telemetry.addData("Error: ", error);
         telemetry.addData("Gain: ", motorGain);
