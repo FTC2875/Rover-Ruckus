@@ -46,7 +46,7 @@ import vision.YellowBlockResult;
  */
 
 @Autonomous(name = "Mecanum Auto Camera")
-
+@Disabled
 public class AutoRun extends LinearOpMode {
     public static final String TAG = "MecanumAutoCameraOpMode";
 

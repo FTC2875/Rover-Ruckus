@@ -4,8 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import edu.spa.ftclib.internal.drivetrain.MecanumDrivetrain;
 
@@ -17,7 +21,6 @@ import edu.spa.ftclib.internal.drivetrain.MecanumDrivetrain;
 
 
 @TeleOp(name = "Mecanum Robot Tele-op")
-
 public class MecanumRobotTeleop extends OpMode {
     private DcMotor frontLeft;
     private DcMotor frontRight;
@@ -26,11 +29,16 @@ public class MecanumRobotTeleop extends OpMode {
 
     private DcMotor[] motors;
 
+    private DcMotorEx armSwivel;
+
     private MecanumDrivetrain drivetrain;
 
     private final double FAST_FACTOR = 3; // max: 0.75
     boolean motorsOn;
     double startTime;
+
+    private boolean stopToggle = true;
+    private boolean buttonToggle = true;
 
 
     /**
@@ -40,10 +48,12 @@ public class MecanumRobotTeleop extends OpMode {
      */
     @Override
     public void init() {
-        frontLeft = hardwareMap.get(DcMotor.class, "fl");
-        frontRight = hardwareMap.get(DcMotor.class, "fr");
-        backLeft = hardwareMap.get(DcMotor.class, "bl");
-        backRight = hardwareMap.get(DcMotor.class, "br");
+//        frontLeft = hardwareMap.get(DcMotor.class, "fl");
+//        frontRight = hardwareMap.get(DcMotor.class, "fr");
+//        backLeft = hardwareMap.get(DcMotor.class, "bl");
+//        backRight = hardwareMap.get(DcMotor.class, "br");
+
+        armSwivel = (DcMotorEx) hardwareMap.get(DcMotor.class, "swivel");
 
         motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
 
@@ -52,12 +62,17 @@ public class MecanumRobotTeleop extends OpMode {
 //        backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
 //        backRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        telemetry.addData("Direction Key: ", "Front left, Front Right, Back Left, Back Right");
-        for (DcMotor motor : motors) {
-            telemetry.addData("Motor Direction: ", motor.getDirection());
-        }
+        armSwivel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        armSwivel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armSwivel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armSwivel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        drivetrain = new MecanumDrivetrain(motors);
+        telemetry.addData("Direction Key: ", "Front left, Front Right, Back Left, Back Right");
+//        for (DcMotor motor : motors) {
+//            telemetry.addData("Motor Direction: ", motor.getDirection());
+//        }
+
+//        drivetrain = new MecanumDrivetrain(motors);
 
         telemetry.update();
         startTime = 0;
@@ -74,6 +89,11 @@ public class MecanumRobotTeleop extends OpMode {
         double rotation = -gamepad1.left_stick_x;
         double velocity = Math.hypot(gamepad1.right_stick_x, gamepad1.right_stick_y);
 
+
+        /**
+         * Motor driving commands, this shouldn't be relevant in terms of testing out the swivel arm
+         */
+        /
         // limit the velocity and rotational velocity since its so STRONG
         if (velocity > 0.25)
             velocity = 0.25;
@@ -90,9 +110,40 @@ public class MecanumRobotTeleop extends OpMode {
         }
 
 
-        drivetrain.setCourse(course);
-        drivetrain.setVelocity(velocity);
-        drivetrain.setRotation(rotation);
+        // normal control mode, dpad-up to bring bar up and dpad-down to bring it down
+        if (gamepad1.dpad_up) {
+            armSwivel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            armSwivel.setPower(0.35);
+        } else if (gamepad1.dpad_down) {
+            armSwivel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            armSwivel.setPower(-0.35);
+        } else {
+            if (stopToggle)
+                armSwivel.setPower(0);
+        }
+
+
+        // run to positon mode, pressing A should bring the bar up to the approximately the halfway point
+        if (gamepad1.a) {
+            armSwivel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armSwivel.setTargetPosition(1200);
+            armSwivel.setPower(0.15);
+        }
+
+
+        // this toggle will explicity set the swivel motor to zero power or not (turn it off to test out the run to position mode)
+        if (gamepad1.b && !buttonToggle) {
+            stopToggle = !stopToggle;
+        }
+
+        // makes sure that we don't double press a button
+        buttonToggle = (gamepad1.a || gamepad1.b || gamepad1.y || gamepad1.x);
+
+
+
+//        drivetrain.setCourse(course);
+//        drivetrain.setVelocity(velocity);
+//        drivetrain.setRotation(rotation);
 
 //        frontRight.setPower(gamepad1.right_stick_y);
 //        backRight.setPower(gamepad1.right_stick_y);
@@ -101,12 +152,13 @@ public class MecanumRobotTeleop extends OpMode {
 //        backLeft.setPower(gamepad1.left_stick_y);
 
 
+        telemetry.addData("Stop Toggle: ", stopToggle);
 
+        PIDFCoefficients coefficients = armSwivel.getPIDFCoefficients(armSwivel.getMode());
+        telemetry.addData("P I D F: ",coefficients.toString());
 
-        telemetry.addData("front right pos: ", frontRight.getCurrentPosition());
-        telemetry.addData("back right pos: ", backRight.getCurrentPosition());
-        telemetry.addData("front left pos: ", frontLeft.getCurrentPosition());
-        telemetry.addData("back left pos: ", backLeft.getCurrentPosition());
+        telemetry.addData("Arm Velocity (rad/s): ", armSwivel.getVelocity(AngleUnit.RADIANS));
+        telemetry.addData("Arm Pos: ", armSwivel.getCurrentPosition());
 
         telemetry.addData("course", course);
         telemetry.addData("velocity", velocity);

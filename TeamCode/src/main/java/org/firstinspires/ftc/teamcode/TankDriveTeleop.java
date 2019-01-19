@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 
 @TeleOp(name = "TankDriveTeleOp", group = "Linear Opmode")
+@Disabled
 // @Autonomous(...) is the other common choice
 public class TankDriveTeleop extends LinearOpMode {
 

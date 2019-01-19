@@ -46,7 +46,7 @@ public class BuddyBotTeleop extends LinearOpMode {
 
         waitForStart();
 
-        double servPow = 0.4;
+        double servPow = 0.41;
 
         while (opModeIsActive()) {
 
@@ -59,12 +59,12 @@ public class BuddyBotTeleop extends LinearOpMode {
             }
 
             // lift mechanism
-            if (gamepad1.dpad_up && lift.getCurrentPosition() < MAX_LIFT) {
+            if ((gamepad1.dpad_up || gamepad2.dpad_up) && lift.getCurrentPosition() < MAX_LIFT) {
                 lift.setPower(0.75);
 
                 telemetry.addData("servo pos: ", lift.getCurrentPosition());
                 telemetry.update();
-            } else if (gamepad1.dpad_down && lift.getCurrentPosition() > MIN_LIFT) {
+            } else if ((gamepad1.dpad_down || gamepad2.dpad_down) && lift.getCurrentPosition() > MIN_LIFT) {
                 lift.setPower(-0.75);
 
                 telemetry.addData("servo pos: ", lift.getCurrentPosition());

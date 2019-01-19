@@ -21,7 +21,7 @@ public class YellowBlockAnaylzer {
     private final static Scalar lowerBounds = new Scalar(18, 134, 45);
     private final static Scalar upperBounds = new Scalar(30, 255, 255);
 
-    private final static int CROP_AMT = 150;
+    private final static int CROP_AMT = 20;
 
     // outdated values
 //    private final static Scalar lowerBounds = new Scalar(22, 81, 0);

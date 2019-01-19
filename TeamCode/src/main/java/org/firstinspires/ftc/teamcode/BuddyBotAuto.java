@@ -234,7 +234,7 @@ public class BuddyBotAuto extends LinearOpMode {
             return;
         }
     }
-
+    boolean firstIterationofScan = true;
     private int orientYellowBlockI = 0;
     private void orientYellowBlock() {
         vision.processFrame();
@@ -242,8 +242,14 @@ public class BuddyBotAuto extends LinearOpMode {
 
         if (!opModeIsActive()) return;
 
-        if (!result.isFoundBlock() || result.getBlockArea() > 23000)  { // if block is no longer detected or is too large, we're close
+        if (!result.isFoundBlock() || result.getPoint() == null || result.getBlockArea() > 23000)  { // if block is no longer detected or is too large, we're close
             if (firstScan) {
+
+                if (firstIterationofScan) {
+                    moveForward(0.2, 500);
+                    firstIterationofScan = false;
+                }
+
 
                 telemetry.addData("area: ", result.getBlockArea());
                 telemetry.update();
@@ -257,7 +263,7 @@ public class BuddyBotAuto extends LinearOpMode {
                 orientYellowBlockI++;
                 orientYellowBlock();
             } else { // we're right in front of the block, this is good
-//                return;
+                return;
             }
         }
 
@@ -268,19 +274,31 @@ public class BuddyBotAuto extends LinearOpMode {
         telemetry.addData("area: ", result.getBlockArea());
 
 
-        double kP = 0.005;
+        double kP = 0.0060;
 
         double error = result.getPoint().x - 462; // subtract the x coordinate from the "center"
         double motorGain = error * kP;
 
-        double motorPower = 0.2;
+        double motorPower = 0.3;
 
+        double leftMotorPower = motorPower + (motorPower * motorGain);
+//        if (leftMotorPower < 0)
+//            leftMotorPower = 0;
+
+//        if (leftMotorPower > 0) {
+//            frontRight.setPower(motorPower); // theoretically pivot on the spot towards the yellow block
+//            frontLeft.setPower(leftMotorPower);
+//        } else {
+//            frontRight.setPower(-leftMotorPower); // theoretically pivot on the spot towards the yellow block
+//            frontLeft.setPower(motorPower);
+//        }
         frontRight.setPower(motorPower); // theoretically pivot on the spot towards the yellow block
-        frontLeft.setPower(motorPower + (motorPower * motorGain));
+        frontLeft.setPower(leftMotorPower);
 
         telemetry.addData("Error: ", error);
         telemetry.addData("Gain: ", motorGain);
-        telemetry.addData("Motor Power: ", motorPower + motorPower * motorGain);
+        telemetry.addData("Right Motor: ", motorPower);
+        telemetry.addData("Left Motor: ", leftMotorPower);
         telemetry.update();
 
         firstScan = false;
