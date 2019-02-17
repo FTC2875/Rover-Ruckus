@@ -41,9 +41,9 @@ import vision.VisionController;
 import vision.YellowBlockResult;
 
 
-@Autonomous(name = "BuddyBot Auto", group = "Linear Opmode")
+@Autonomous(name = "BuddyBot Auto Marker", group = "Linear Opmode")
 // @Autonomous(...) is the other common choice
-public class BuddyBotAuto extends LinearOpMode {
+public class BuddyBotAutoMarker extends LinearOpMode {
     public static final String TAG = "BuddyBotAuto";
 
 
@@ -241,10 +241,14 @@ public class BuddyBotAuto extends LinearOpMode {
 
             telemetry.addData("status", "bot correctly positioned, going forward now");
 
-            moveForward(0.30, 1500);
+            spinner.setPower(1);
+            sleep(1500);
+            spinner.setPower(0);
+
             return;
         }
     }
+
     boolean firstIterationofScan = true;
     private int orientYellowBlockI = 0;
     private void orientYellowBlock() {

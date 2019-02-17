@@ -17,6 +17,7 @@ public class BuddyBotTeleop extends LinearOpMode {
     private DcMotor leftDriveMotor;
     private DcMotor rightDriveMotor;
     private DcMotor spinner;
+    private DcMotor clamp;
 
     private DcMotor lift;
     private CRServo bucketFlipper;
@@ -32,7 +33,7 @@ public class BuddyBotTeleop extends LinearOpMode {
         rightDriveMotor = hardwareMap.dcMotor.get("rightdrive");
         leftDriveMotor = hardwareMap.dcMotor.get("leftdrive");
         spinner = hardwareMap.dcMotor.get("spinner");
-        lift = hardwareMap.dcMotor.get("lift");
+        lift = hardwareMap.dcMotor.get("lift"); // bad
         bucketFlipper = hardwareMap.crservo.get("flipper");
 
         rightDriveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -43,6 +44,7 @@ public class BuddyBotTeleop extends LinearOpMode {
 
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
         waitForStart();
 
@@ -123,12 +125,12 @@ public class BuddyBotTeleop extends LinearOpMode {
             buttonPressed = gamepad1.y || gamepad1.a || gamepad1.b || gamepad1.x;
 
             if (gamepad1.right_bumper) {
-                leftDriveMotor.setPower(-gamepad1.left_stick_y * slowFactor);
-                rightDriveMotor.setPower(-gamepad1.right_stick_y * slowFactor);
+                leftDriveMotor.setPower(gamepad1.left_stick_y * slowFactor);
+                rightDriveMotor.setPower(gamepad1.right_stick_y * slowFactor);
 
             } else {
-                leftDriveMotor.setPower(gamepad1.right_stick_y * slowFactor);
-                rightDriveMotor.setPower(gamepad1.left_stick_y * slowFactor);
+                leftDriveMotor.setPower(-gamepad1.right_stick_y * slowFactor);
+                rightDriveMotor.setPower(-gamepad1.left_stick_y * slowFactor);
             }
 
             telemetry.addData("flipper power", bucketFlipper.getPower());
