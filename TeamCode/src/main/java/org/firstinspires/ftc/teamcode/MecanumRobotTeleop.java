@@ -35,12 +35,17 @@ public class MecanumRobotTeleop extends OpMode {
     private DcMotor frontRight;
     private DcMotor backLeft;
     private DcMotor backRight;
+    private DcMotor liftRight;
+    private DcMotor liftLeft;
 
     private DcMotor[] motors;
 
 //    private DcMotorEx armSwivel;
 
     private MecanumDrivetrain drivetrain;
+    
+    private final int minLiftTicks = 0;
+    private final int maxLiftTicks = 100;
 
     private final double FAST_FACTOR = 3; // max: 0.75
     boolean motorsOn;
@@ -61,22 +66,26 @@ public class MecanumRobotTeleop extends OpMode {
         frontRight = hardwareMap.get(DcMotor.class, "fr");
         backLeft = hardwareMap.get(DcMotor.class, "bl");
         backRight = hardwareMap.get(DcMotor.class, "br");
+        liftRight = hardwareMap.get(DcMotor.class, "lr");
+        liftLeft = hardwareMap.get(DcMotor.class, "ll");
 
     //    armSwivel = (DcMotorEx) hardwareMap.get(DcMotor.class, "swivel");
 
-        motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
+        motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight, liftRight, liftLeft};
 
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        liftRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        liftLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
      //   armSwivel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        armSwivel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      //   armSwivel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
      //   armSwivel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        telemetry.addData("Direction Key: ", "Front left, Front Right, Back Left, Back Right");
+        telemetry.addData("Direction Key: ", "Front left, Front Right, Back Left, Back Right, Lift");
         for (DcMotor motor : motors) {
             telemetry.addData("Motor Direction: ", motor.getDirection());
         }
@@ -131,6 +140,15 @@ public class MecanumRobotTeleop extends OpMode {
         //        armSwivel.setPower(0);
         //}
 
+        if(gamepad1.y && gamepad1.a)
+            if (gamepad1.y) {
+                liftRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                liftRight.setPower(0.35);
+            } else if (gamepad1.a) {
+                while(liftRight.getCurrentPosition() > 0)
+                liftRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                liftRight.setPower(-0.35);
+        }
 
         // run to positon mode, pressing A should bring the bar up to the approximately the halfway point
         //if (gamepad1.a) {
