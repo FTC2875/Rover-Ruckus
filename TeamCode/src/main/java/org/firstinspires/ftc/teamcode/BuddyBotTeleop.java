@@ -9,6 +9,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
+/**
+ * Author: Darwin
+ *
+ * Usage: Basic tank drive, Rotating arm with collector on end to score balls and blocks
+ *
+ * Motors: 2 drive motors, 1 spinner motor, 1 clamp motor, 1 lift motor, 1 bucket flipper continuous servo
+ * Sensors: internal REV IMU, External USB webcam
+ */
 
 @TeleOp(name = "BuddyBot Teleop", group = "Linear Opmode")
 // @Autonomous(...) is the other common choice

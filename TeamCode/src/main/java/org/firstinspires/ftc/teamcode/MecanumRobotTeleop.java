@@ -19,6 +19,15 @@ import edu.spa.ftclib.internal.drivetrain.MecanumDrivetrain;
  *  ^^ Thanks Michaela - 2875
  */
 
+/**
+ * Author: Darwin
+ *
+ * Usage: Implements HOMAR FTC library for mecanum drive control
+ *
+ * Motors: 4 drive motors
+ * Sensors: internal REV IMU
+ */
+
 
 @TeleOp(name = "Mecanum Robot Tele-op")
 public class MecanumRobotTeleop extends OpMode {

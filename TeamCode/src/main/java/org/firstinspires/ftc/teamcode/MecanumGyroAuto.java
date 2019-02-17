@@ -43,6 +43,16 @@ import vision.YellowBlockResult;
  * Tested and found fully functional by Gabriel on 2018-8-4.
  */
 
+/**
+ * Author: Darwin
+ *
+ * Usage: Implements HOMAR FTC library for mecanum drive control and precise turns during autonomous, uses Vuforia to identify yellow cube and move it,
+ *          PID controller for aiming towards yellow block
+ *
+ * Motors: 4 drive motors
+ * Sensors: internal REV IMU, External USB webcam
+ */
+
 @Autonomous(name = "Mecanum Auto Demo", group = "sample")
 public class MecanumGyroAuto extends LinearOpMode {
     public static final String TAG = "AutoOpMode";

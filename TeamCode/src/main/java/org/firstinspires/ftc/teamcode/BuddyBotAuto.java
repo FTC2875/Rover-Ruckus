@@ -40,6 +40,16 @@ import java.util.Locale;
 import vision.VisionController;
 import vision.YellowBlockResult;
 
+/**
+ * Author: Darwin
+ *
+ * Usage: Basic tank drive, uses Vuforia to identify yellow cube and move it,
+ *          PID controller for aiming towards yellow block, continues into crater for autonomous points
+ *
+ * Motors: 2 drive motors, 1 spinner motor, 1 clamp motor, 1 lift motor, 1 bucket flipper continuous servo
+ * Sensors: internal REV IMU, External USB webcam
+ */
+
 
 @Autonomous(name = "BuddyBot Auto", group = "Linear Opmode")
 // @Autonomous(...) is the other common choice

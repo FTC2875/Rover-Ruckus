@@ -39,6 +39,8 @@ import vision.VisionController;
 import vision.YellowBlockResult;
 
 /**
+ * Author: Darwin
+ *
  * Autonomous program using sample code from MecanumGyroAuto.java
  * and ConceptVuforiaNavigationWebcam.java
  */

@@ -27,6 +27,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Test opMode to calibrate color parameters for vuforia using the webcam
+ * Author: Darwin
+ */
+
+
 package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Bitmap;
