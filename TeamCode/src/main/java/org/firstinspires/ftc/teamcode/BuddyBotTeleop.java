@@ -32,6 +32,7 @@ public class BuddyBotTeleop extends LinearOpMode {
 
     private boolean buttonPressed = false;
 
+
     private static final int MAX_LIFT = 3850;
     private static final int MIN_LIFT = 200;
 
@@ -44,15 +45,13 @@ public class BuddyBotTeleop extends LinearOpMode {
         lift = hardwareMap.dcMotor.get("lift"); // bad
         bucketFlipper = hardwareMap.crservo.get("flipper");
 
-        rightDriveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftDriveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
         leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
         rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
 
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
 
         waitForStart();
 
@@ -92,6 +91,7 @@ public class BuddyBotTeleop extends LinearOpMode {
                 spinner.setPower(0);
             }
 
+
             //flipper mechanism
             if (gamepad1.y) {
 //                double curPos = bucketFlipper.getPosition();
@@ -129,6 +129,7 @@ public class BuddyBotTeleop extends LinearOpMode {
 //            } else if (gamepad1.b && !buttonPressed) {
 //                servPow -= 0.01;
 //            }
+
 
             buttonPressed = gamepad1.y || gamepad1.a || gamepad1.b || gamepad1.x;
 

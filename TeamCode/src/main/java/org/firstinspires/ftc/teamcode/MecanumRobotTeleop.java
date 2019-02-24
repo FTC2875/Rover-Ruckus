@@ -35,14 +35,20 @@ public class MecanumRobotTeleop extends OpMode {
     private DcMotor frontRight;
     private DcMotor backLeft;
     private DcMotor backRight;
-    private DcMotor liftRight;
-    private DcMotor liftLeft;
+//    private DcMotor liftRight;
+//    private DcMotor liftLeft;
 
     private DcMotor[] motors;
 
 //    private DcMotorEx armSwivel;
 
     private MecanumDrivetrain drivetrain;
+
+    private DcMotor leftLift = null;
+    private DcMotor rightLift = null;
+
+    private final int LIFT_MAX = 20000;
+    private final int LIFT_MIN = 200;
     
     private final int minLiftTicks = 0;
     private final int maxLiftTicks = 100;
@@ -66,19 +72,33 @@ public class MecanumRobotTeleop extends OpMode {
         frontRight = hardwareMap.get(DcMotor.class, "fr");
         backLeft = hardwareMap.get(DcMotor.class, "bl");
         backRight = hardwareMap.get(DcMotor.class, "br");
-        liftRight = hardwareMap.get(DcMotor.class, "lr");
-        liftLeft = hardwareMap.get(DcMotor.class, "ll");
+//        liftRight = hardwareMap.get(DcMotor.class, "lr");
+//        liftLeft = hardwareMap.get(DcMotor.class, "ll");
+
+
+        rightLift = hardwareMap.dcMotor.get("rightlift");
+        leftLift = hardwareMap.dcMotor.get("leftlift");
 
     //    armSwivel = (DcMotorEx) hardwareMap.get(DcMotor.class, "swivel");
 
-        motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight, liftRight, liftLeft};
+        motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
 
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        liftRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        liftLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+//        liftRight.setDirection(DcMotorSimple.Direction.FORWARD);
+//        liftLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+        rightLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        rightLift.setDirection(DcMotor.Direction.FORWARD);
+        leftLift.setDirection(DcMotor.Direction.REVERSE);
 
      //   armSwivel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        armSwivel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -128,6 +148,19 @@ public class MecanumRobotTeleop extends OpMode {
         }
 
 
+        if (gamepad1.dpad_up) {
+            rightLift.setPower(0.75);
+            leftLift.setPower(0.75);
+
+        } else if (gamepad1.dpad_down) {
+            rightLift.setPower(-0.75);
+            leftLift.setPower(-0.75);
+        } else {
+            rightLift.setPower(0);
+            leftLift.setPower(0);
+        }
+
+
         // normal control mode, dpad-up to bring bar up and dpad-down to bring it down
         //if (gamepad1.dpad_up) {
         //    armSwivel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -140,15 +173,15 @@ public class MecanumRobotTeleop extends OpMode {
         //        armSwivel.setPower(0);
         //}
 
-        if(gamepad1.y && gamepad1.a)
-            if (gamepad1.y) {
-                liftRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                liftRight.setPower(0.35);
-            } else if (gamepad1.a) {
-                while(liftRight.getCurrentPosition() > 0)
-                liftRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                liftRight.setPower(-0.35);
-        }
+//        if(gamepad1.y && gamepad1.a)
+//            if (gamepad1.y) {
+//                liftRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                liftRight.setPower(0.35);
+//            } else if (gamepad1.a) {
+//                while(liftRight.getCurrentPosition() > 0)
+//                liftRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                liftRight.setPower(-0.35);
+//        }
 
         // run to positon mode, pressing A should bring the bar up to the approximately the halfway point
         //if (gamepad1.a) {
