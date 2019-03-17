@@ -53,6 +53,7 @@ public class BuddyBotTeleop extends LinearOpMode {
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+
         waitForStart();
 
         double servPow = 0.41;

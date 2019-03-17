@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -35,6 +36,7 @@ public class MecanumRobotTeleop extends OpMode {
     private DcMotor frontRight;
     private DcMotor backLeft;
     private DcMotor backRight;
+    private Servo markerServo;
 //    private DcMotor liftRight;
 //    private DcMotor liftLeft;
 
@@ -68,6 +70,7 @@ public class MecanumRobotTeleop extends OpMode {
      */
     @Override
     public void init() {
+        markerServo= hardwareMap.get(Servo.class, "depotDropper");
         frontLeft = hardwareMap.get(DcMotor.class, "fl");
         frontRight = hardwareMap.get(DcMotor.class, "fr");
         backLeft = hardwareMap.get(DcMotor.class, "bl");
@@ -127,19 +130,24 @@ public class MecanumRobotTeleop extends OpMode {
         double rotation = -gamepad1.left_stick_x;
         double velocity = Math.hypot(gamepad1.right_stick_x, gamepad1.right_stick_y);
 
-
+        //Servo Code
+        if(gamepad1.a) {
+            markerServo.setPosition(1);
+        }else{
+            markerServo.setPosition(0);
+        }
         /**
          * Motor driving commands, this shouldn't be relevant in terms of testing out the swivel arm
          */
 
         // limit the velocity and rotational velocity since its so STRONG
-        if (velocity > 0.25)
-            velocity = 0.25;
+        if (velocity > 0.75)
+            velocity = 0.75;
 
-        if (rotation < -0.25)
-            rotation = -0.25;
-        else if (rotation > 0.25)
-            rotation = 0.25;
+        if (rotation < -0.75)
+            rotation = -0.75;
+        else if (rotation > 0.75)
+            rotation = 0.75;
 
         // this is dangerous
         if (gamepad1.left_bumper) {
@@ -204,13 +212,6 @@ public class MecanumRobotTeleop extends OpMode {
         drivetrain.setCourse(course);
         drivetrain.setVelocity(velocity);
         drivetrain.setRotation(rotation);
-
-        frontRight.setPower(gamepad1.right_stick_y);
-        backRight.setPower(gamepad1.right_stick_y);
-
-        frontLeft.setPower(gamepad1.left_stick_y);
-        backLeft.setPower(gamepad1.left_stick_y);
-
 
         telemetry.addData("Stop Toggle: ", stopToggle);
 
